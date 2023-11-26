@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 
-class TransactionForm extends StatelessWidget {
-  TransactionForm({
+class TransactionForm extends StatefulWidget {
+  const TransactionForm({
     super.key,
     required this.onSubmit,
   });
 
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController valueController = TextEditingController();
-
   final void Function(String, double) onSubmit;
+
+  @override
+  State<TransactionForm> createState() => _TransactionFormState();
+}
+
+class _TransactionFormState extends State<TransactionForm> {
+  final TextEditingController titleController = TextEditingController();
+
+  final TextEditingController valueController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -24,18 +30,20 @@ class TransactionForm extends StatelessWidget {
               decoration: const InputDecoration(labelText: "Título"),
               controller: titleController,
               keyboardType: TextInputType.text,
+              onFieldSubmitted: (_) => _submitForm,
             ),
             TextFormField(
               decoration: const InputDecoration(labelText: "Valor (R\$)"),
               controller: valueController,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
+              onFieldSubmitted: (_) {
+                _submitForm;
+              },
             ),
             TextButton(
               onPressed: () {
-                final title = titleController.text;
-                final value = double.tryParse(valueController.text) ?? 0.0;
-                onSubmit(title, value);
+                _submitForm();
               },
               child: const Text(
                 "Nova Transação",
@@ -46,5 +54,16 @@ class TransactionForm extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  _submitForm() {
+    final title = titleController.text;
+    final value = double.tryParse(valueController.text);
+
+    if (title.isEmpty || value == null) {
+      return;
+    }
+
+    widget.onSubmit(title, value);
   }
 }
