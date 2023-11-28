@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:expenses_app/components/chart.dart';
 import 'package:expenses_app/components/transaction_form.dart';
 import 'package:expenses_app/components/transaction_list.dart';
 import 'package:expenses_app/models/transaction.dart';
@@ -57,13 +58,13 @@ class _MyHomePageState extends State<MyHomePage> {
       id: "1",
       title: "Compra de alimentos",
       value: 50.0,
-      date: DateTime.now(),
+      date: DateTime.now().subtract(const Duration(days: 3)),
     ),
     Transaction(
       id: "2",
       title: "Pagamento de conta de luz",
       value: 80.0,
-      date: DateTime(2023, 11, 25),
+      date: DateTime(2023, 11, 27),
     ),
     Transaction(
       id: "3",
@@ -87,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
       id: "6",
       title: "Depósito em conta",
       value: 300.0,
-      date: DateTime(2023, 10, 30),
+      date: DateTime(2023, 11, 27),
     ),
     Transaction(
       title: "Compras de eletrônicos",
@@ -123,9 +124,18 @@ class _MyHomePageState extends State<MyHomePage> {
       id: '',
       title: "Gás de cozinha",
       value: 60.0,
-      date: DateTime(2023, 9, 22),
+      date: DateTime(2023, 11, 27),
     ),
   ];
+
+  List<Transaction> get _recentTransactions {
+    return _transactions.where((tr) {
+      return tr.date.isAfter(DateTime.now().subtract(
+        const Duration(days: 7),
+      ));
+    }).toList();
+  }
+
   _addTransaction(String title, double value) {
     final newTransaction = Transaction(
       id: Random().nextInt.toString(),
@@ -165,11 +175,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Card(
-              color: Colors.pink,
-              elevation: 5,
-              child: Text('Gráfico'),
-            ),
+            Chart(recentTransaction: _recentTransactions),
             TransactionList(transactions: _transactions),
           ],
         ),
