@@ -18,53 +18,29 @@ class TransactionList extends StatelessWidget {
             ? ListView.builder(
                 itemCount: transactions.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return Column(
-                    children: [
-                      Card(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              margin: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.background,
-                                border: Border.all(
-                                  color: Colors.purple,
-                                  width: 2,
-                                ),
-                              ),
-                              child: Text(
-                                "R\$ ${transactions[index].value.toStringAsFixed(2)}",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                  color: Colors.purple,
-                                ),
-                              ),
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.purple,
+                      radius: 30,
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: FittedBox(
+                          child: Text(
+                            'R\$${transactions[index].value}',
+                            style: const TextStyle(
+                              color: Colors.white,
                             ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  transactions[index].title,
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                ),
-                                Text(
-                                  DateFormat('dd MMM yyyy')
-                                      .format(transactions[index].date),
-                                  style: TextStyle(color: Colors.grey[700]),
-                                ),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
-                      )
-                    ],
+                      ),
+                    ),
+                    title: Text(
+                      transactions[index].title,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    subtitle: Text(
+                      DateFormat('d MMM y').format(transactions[index].date),
+                    ),
                   );
                 },
               )
