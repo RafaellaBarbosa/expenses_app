@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:expenses_app/components/chart.dart';
 import 'package:expenses_app/components/transaction_form.dart';
 import 'package:expenses_app/components/transaction_list.dart';
@@ -18,12 +18,20 @@ class ExpensesApp extends StatelessWidget {
     final ThemeData tema = ThemeData();
     return MaterialApp(
       home: const MyHomePage(),
+      localizationsDelegates: const [
+        ...GlobalMaterialLocalizations.delegates,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', 'US'),
+        Locale('pt', 'BR'),
+      ],
       debugShowCheckedModeBanner: false,
       theme: tema.copyWith(
         colorScheme: tema.colorScheme.copyWith(
-          primary: Colors.purple,
-          secondary: Colors.amber,
-        ),
+            primary: Colors.purple,
+            secondary: Colors.amber,
+            tertiary: Colors.white),
         textTheme: tema.textTheme.copyWith(
           titleLarge: const TextStyle(
             fontFamily: 'OpenSans',
