@@ -6,9 +6,11 @@ class TransactionList extends StatelessWidget {
   const TransactionList({
     super.key,
     required this.transactions,
+    required this.onRemove,
   });
 
   final List<Transaction> transactions;
+  final void Function(String) onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +20,15 @@ class TransactionList extends StatelessWidget {
             ? ListView.builder(
                 itemCount: transactions.length,
                 itemBuilder: (BuildContext context, int index) {
+                  final tr = transactions[index];
+
                   return ListTile(
+                    onLongPress: () => showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertConfirmation(onRemove: onRemove, tr: tr);
+                      },
+                    ),
                     leading: CircleAvatar(
                       backgroundColor: Colors.purple,
                       radius: 30,
@@ -26,7 +36,7 @@ class TransactionList extends StatelessWidget {
                         padding: const EdgeInsets.all(6),
                         child: FittedBox(
                           child: Text(
-                            'R\$${transactions[index].value}',
+                            'R\$${tr.value}',
                             style: const TextStyle(
                               color: Colors.white,
                             ),
@@ -35,11 +45,21 @@ class TransactionList extends StatelessWidget {
                       ),
                     ),
                     title: Text(
-                      transactions[index].title,
+                      tr.title,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     subtitle: Text(
-                      DateFormat('d MMM y').format(transactions[index].date),
+                      DateFormat('d MMM y').format(tr.date),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      color: Theme.of(context).colorScheme.error,
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertConfirmation(onRemove: onRemove, tr: tr);
+                        },
+                      ),
                     ),
                   );
                 },
@@ -59,5 +79,45 @@ class TransactionList extends StatelessWidget {
                   ),
                 ],
               ));
+  }
+}
+
+class AlertConfirmation extends StatelessWidget {
+  const AlertConfirmation({
+    super.key,
+    required this.onRemove,
+    required this.tr,
+  });
+
+  final void Function(String p1) onRemove;
+  final Transaction tr;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Excluir'),
+      content: const Text("Tem certeza de que quer excluir esta despesa?"),
+      actions: <Widget>[
+        TextButton(
+          style: TextButton.styleFrom(
+            textStyle: Theme.of(context).textTheme.labelLarge,
+          ),
+          child: const Text('Sim'),
+          onPressed: () {
+            onRemove(tr.id);
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          style: TextButton.styleFrom(
+            textStyle: Theme.of(context).textTheme.labelLarge,
+          ),
+          child: const Text('Não'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
   }
 }
