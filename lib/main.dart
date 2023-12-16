@@ -1,10 +1,10 @@
-import 'dart:math';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:expenses_app/components/chart.dart';
 import 'package:expenses_app/components/transaction_form.dart';
 import 'package:expenses_app/components/transaction_list.dart';
 import 'package:expenses_app/models/transaction.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 void main(List<String> args) {
   runApp(const ExpensesApp());
@@ -61,7 +61,20 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<Transaction> _transactions = [];
+  final List<Transaction> _transactions = [
+    Transaction(
+      id: "1",
+      title: "Compra de produtos",
+      value: 50.0,
+      date: DateTime.now(),
+    ),
+    Transaction(
+      id: "2",
+      title: "Compra de produtos",
+      value: 50.0,
+      date: DateTime.now(),
+    )
+  ];
 
   List<Transaction> get _recentTransactions {
     return _transactions.where((tr) {
@@ -73,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _addTransaction(String title, double value, DateTime date) {
     final newTransaction = Transaction(
-      id: Random().nextInt.toString(),
+      id: const Uuid().v4(),
       title: title,
       value: value,
       date: date,
@@ -84,11 +97,12 @@ class _MyHomePageState extends State<MyHomePage> {
     Navigator.of(context).pop();
   }
 
-    _removeTransaction(String id) {
+  _removeTransaction(String id) {
     setState(() {
       _transactions.removeWhere((tr) => tr.id == id);
     });
   }
+
   _openTransactionFormModal(BuildContext context) {
     showModalBottomSheet(
         context: context,

@@ -39,6 +39,7 @@ dependencies:
   flutter_localization: ^0.1.14
   flutter_localizations:
     sdk: flutter
+  uuid: ^4.2.2
   
 
 dev_dependencies:
