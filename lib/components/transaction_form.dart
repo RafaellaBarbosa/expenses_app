@@ -1,5 +1,7 @@
+import 'package:expenses_app/components/adaptative_button.dart';
+import 'package:expenses_app/components/adaptative_date_picker.dart';
+import 'package:expenses_app/components/adaptative_text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class TransactionForm extends StatefulWidget {
   const TransactionForm({
@@ -20,64 +22,48 @@ class _TransactionFormState extends State<TransactionForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 5,
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            TextFormField(
-              decoration: const InputDecoration(labelText: "Título"),
-              controller: titleController,
-              keyboardType: TextInputType.text,
-              onFieldSubmitted: (_) => _submitForm,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: "Valor (R\$)"),
-              controller: valueController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              onFieldSubmitted: (_) {
-                _submitForm;
-              },
-            ),
-            SizedBox(
-              height: 70,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Data Selecionada: ${DateFormat('dd/MM/y').format(_selectedDate)}',
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      _showDatePicker();
-                    },
-                    child: Text(
-                      "Selecionar Data",
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )
-                ],
+    return SingleChildScrollView(
+      child: Card(
+        elevation: 5,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+              10.0, 10, 10, 10 + MediaQuery.of(context).viewInsets.bottom),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              AdaptativeTextField(
+                label: "Título",
+                controller: titleController,
+                keyboardType: TextInputType.text,
+                onSubmitted: (_) => _submitForm,
+                textInputAction: TextInputAction.next,
               ),
-            ),
-            FilledButton(
-              onPressed: () {
-                _submitForm();
-              },
-              child: const Text(
-                "Nova Transação",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+              AdaptativeTextField(
+                label: "Valor (R\$)",
+                controller: valueController,
+                textInputAction: TextInputAction.done,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                onSubmitted: (_) {
+                  _submitForm;
+                },
               ),
-            )
-          ],
+              AdaptativeDatePicker(
+                selectedDate: _selectedDate,
+                onDateChanged: (newDate) {
+                  setState(() {
+                    _selectedDate = newDate;
+                  });
+                },
+              ),
+              AdaptativeButton(
+                onPressed: () {
+                  _submitForm();
+                },
+                label: "Nova Transação",
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -92,22 +78,5 @@ class _TransactionFormState extends State<TransactionForm> {
     }
 
     widget.onSubmit(title, value, _selectedDate);
-  }
-
-  _showDatePicker() {
-    showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-    ).then((pickedDate) {
-      if (pickedDate == null) {
-        return;
-      }
-
-      setState(() {
-        _selectedDate = pickedDate;
-      });
-    });
   }
 }

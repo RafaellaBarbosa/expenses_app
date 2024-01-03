@@ -61,20 +61,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<Transaction> _transactions = [
-    Transaction(
-      id: "1",
-      title: "Compra de produtos",
-      value: 50.0,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: "2",
-      title: "Compra de produtos",
-      value: 50.0,
-      date: DateTime.now(),
-    )
-  ];
+  final List<Transaction> _transactions = [];
+  bool showChart = false;
 
   List<Transaction> get _recentTransactions {
     return _transactions.where((tr) {
@@ -113,26 +101,50 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Despesas Pessoais",
-        ),
-        actions: [
+    final mediaQuery = MediaQuery.of(context);
+    bool isLandscape = mediaQuery.orientation == Orientation.landscape;
+    final appBar = AppBar(
+      title: const Text("Despesas Pessoais"),
+      actions: [
+        if (isLandscape)
           IconButton(
-            onPressed: () => _openTransactionFormModal(context),
-            icon: const Icon(Icons.add),
+            onPressed: () {
+              setState(() {
+                showChart = !showChart;
+              });
+            },
+            icon: Icon(showChart ? Icons.list : Icons.pie_chart),
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Chart(recentTransaction: _recentTransactions),
-            TransactionList(
-                transactions: _transactions, onRemove: _removeTransaction),
-          ],
+        IconButton(
+          onPressed: () => _openTransactionFormModal(context),
+          icon: const Icon(Icons.add),
+        ),
+      ],
+    );
+    final avaibleHeight = mediaQuery.size.height -
+        appBar.preferredSize.height -
+        mediaQuery.padding.top;
+    return Scaffold(
+      appBar: appBar,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (showChart || !isLandscape)
+                SizedBox(
+                  height: avaibleHeight * (isLandscape ? 0.7 : 0.3),
+                  child: Chart(recentTransaction: _recentTransactions),
+                ),
+              if (!showChart || !isLandscape)
+                SizedBox(
+                  height: avaibleHeight * 0.75,
+                  child: TransactionList(
+                      transactions: _transactions,
+                      onRemove: _removeTransaction),
+                ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
