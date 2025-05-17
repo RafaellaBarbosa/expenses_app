@@ -67,4 +67,4 @@ flutter run
 
 ## 🧑‍💻 Autor
 
-Desenvolvido por [Rafaella Barbosa Costa](https://www.linkedin.com/in/rafaella-barbosa-costa/)
+Desenvolvido por [Rafaella Barbosa Costa](https://www.linkedin.com/in/rafaella-costa/)
