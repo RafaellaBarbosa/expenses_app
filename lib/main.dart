@@ -1,9 +1,9 @@
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:expenses_app/components/chart.dart';
 import 'package:expenses_app/components/transaction_form.dart';
 import 'package:expenses_app/components/transaction_list.dart';
 import 'package:expenses_app/models/transaction.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 void main(List<String> args) {
@@ -38,6 +38,11 @@ class ExpensesApp extends StatelessWidget {
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.black,
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.purple,
           ),
         ),
         appBarTheme: const AppBarTheme(
@@ -91,12 +96,56 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  _openTransactionFormModal(BuildContext context) {
+  void _updateTransaction(
+    Transaction transaction,
+  ) {
+    setState(() {
+      final index = _transactions.indexWhere((tr) => tr.id == transaction.id);
+      if (index >= 0) {
+        _transactions[index] = _transactions[index].copyWith(
+          title: transaction.title,
+          value: transaction.value,
+          date: transaction.date,
+        );
+      }
+    });
+    Navigator.of(context).pop();
+  }
+
+  void _openTransactionFormModal(BuildContext context,
+      [Transaction? transaction]) {
     showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return TransactionForm(onSubmit: _addTransaction);
-        });
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+      ),
+      builder: (context) {
+        return TransactionForm(
+          onSubmit: transaction == null ? _addTransaction : null,
+          onUpdate: transaction != null ? _updateTransaction : null,
+          transaction: transaction,
+        );
+      },
+    );
+  }
+
+  void _openTransactionEditFormModal(
+      BuildContext context, Transaction transaction) {
+    showModalBottomSheet(
+      context: context,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+      ),
+      builder: (_) {
+        return TransactionForm(
+          transaction: transaction,
+          onUpdate: _updateTransaction,
+        );
+      },
+    );
   }
 
   @override
@@ -140,19 +189,24 @@ class _MyHomePageState extends State<MyHomePage> {
                 SizedBox(
                   height: avaibleHeight * 0.75,
                   child: TransactionList(
-                      transactions: _transactions,
-                      onRemove: _removeTransaction),
+                    transactions: _transactions,
+                    onRemove: _removeTransaction,
+                    onUpdate: _openTransactionEditFormModal,
+                  ),
                 ),
             ],
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Theme.of(context).colorScheme.primary,
         onPressed: () {
           _openTransactionFormModal(context);
         },
+        isExtended: true,
         child: const Icon(
           Icons.add,
+          color: Colors.white,
         ),
       ),
     );

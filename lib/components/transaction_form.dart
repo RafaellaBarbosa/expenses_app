@@ -1,82 +1,135 @@
-import 'package:expenses_app/components/adaptative_button.dart';
-import 'package:expenses_app/components/adaptative_date_picker.dart';
 import 'package:expenses_app/components/adaptative_text_field.dart';
+import 'package:expenses_app/models/transaction.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class TransactionForm extends StatefulWidget {
+  final void Function(String title, double value, DateTime date)? onSubmit;
+  final void Function(Transaction transaction)? onUpdate;
+  final Transaction? transaction;
+
   const TransactionForm({
     super.key,
-    required this.onSubmit,
+    this.onSubmit,
+    this.onUpdate,
+    this.transaction,
   });
-
-  final void Function(String, double, DateTime) onSubmit;
 
   @override
   State<TransactionForm> createState() => _TransactionFormState();
 }
 
 class _TransactionFormState extends State<TransactionForm> {
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController valueController = TextEditingController();
-  DateTime _selectedDate = DateTime.now();
+  final _titleController = TextEditingController();
+  final _valueController = TextEditingController();
+  DateTime? _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.transaction != null) {
+      _titleController.text = widget.transaction!.title;
+      _valueController.text = widget.transaction!.value.toString();
+      _selectedDate = widget.transaction!.date;
+    }
+  }
+
+  void _submitForm() {
+    final title = _titleController.text.trim();
+    final value =
+        double.tryParse(_valueController.text.replaceAll(',', '.')) ?? 0.0;
+
+    if (title.isEmpty || value <= 0 || _selectedDate == null) return;
+
+    if (widget.transaction != null && widget.onUpdate != null) {
+      final updated = widget.transaction!.copyWith(
+        title: title,
+        value: value,
+        date: _selectedDate!,
+      );
+      widget.onUpdate!(updated);
+    } else if (widget.onSubmit != null) {
+      widget.onSubmit!(title, value, _selectedDate!);
+    }
+  }
+
+  void _showDatePicker() {
+    showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      locale: const Locale('pt', 'BR'),
+    ).then((pickedDate) {
+      if (pickedDate == null) return;
+
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.transaction != null;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
     return SingleChildScrollView(
       child: Card(
-        elevation: 5,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(
-              10.0, 10, 10, 10 + MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: 16 + bottomInset,
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
             children: [
               AdaptativeTextField(
-                label: "Título",
-                controller: titleController,
+                controller: _titleController,
+                label: 'Título',
+                onSubmitted: (_) => _submitForm(),
                 keyboardType: TextInputType.text,
-                onSubmitted: (_) => _submitForm,
                 textInputAction: TextInputAction.next,
               ),
               AdaptativeTextField(
-                label: "Valor (R\$)",
-                controller: valueController,
-                textInputAction: TextInputAction.done,
+                controller: _valueController,
+                label: 'Valor (R\$)',
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
-                onSubmitted: (_) {
-                  _submitForm;
-                },
+                onSubmitted: (_) => _submitForm(),
+                textInputAction: TextInputAction.done,
               ),
-              AdaptativeDatePicker(
-                selectedDate: _selectedDate,
-                onDateChanged: (newDate) {
-                  setState(() {
-                    _selectedDate = newDate;
-                  });
-                },
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _selectedDate == null
+                          ? 'Nenhuma data selecionada!'
+                          : 'Data: ${DateFormat('dd/MM/yyyy').format(_selectedDate!)}',
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _showDatePicker,
+                    child: const Text('Selecionar Data'),
+                  ),
+                ],
               ),
-              AdaptativeButton(
-                onPressed: () {
-                  _submitForm();
-                },
-                label: "Nova Transação",
-              )
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _submitForm,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(isEditing ? 'Atualizar' : 'Adicionar'),
+              ),
             ],
           ),
         ),
       ),
     );
-  }
-
-  _submitForm() {
-    final title = titleController.text;
-    final value = double.tryParse(valueController.text);
-
-    if (title.isEmpty || value == null) {
-      return;
-    }
-
-    widget.onSubmit(title, value, _selectedDate);
   }
 }

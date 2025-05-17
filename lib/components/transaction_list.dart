@@ -7,10 +7,12 @@ class TransactionList extends StatelessWidget {
     super.key,
     required this.transactions,
     required this.onRemove,
+    required this.onUpdate,
   });
 
   final List<Transaction> transactions;
   final void Function(String) onRemove;
+  final void Function(BuildContext, Transaction) onUpdate;
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +21,8 @@ class TransactionList extends StatelessWidget {
             itemCount: transactions.length,
             itemBuilder: (BuildContext context, int index) {
               final tr = transactions[index];
-
               return ListTile(
+                onTap: () => onUpdate(context, tr),
                 onLongPress: () => showDialog(
                   context: context,
                   builder: (context) {
@@ -35,9 +37,7 @@ class TransactionList extends StatelessWidget {
                     child: FittedBox(
                       child: Text(
                         'R\$${tr.value}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                        ),
+                        style: const TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
@@ -52,23 +52,25 @@ class TransactionList extends StatelessWidget {
               );
             },
           )
-        : LayoutBuilder(builder: (context, constraints) {
-            return Column(
-              children: [
-                const SizedBox(height: 20),
-                Text(
-                  "Nenhuma Transação Cadastrada",
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 20),
-                Image.asset(
-                  "assets/images/waiting.png",
-                  fit: BoxFit.cover,
-                  height: constraints.maxHeight * 0.6,
-                ),
-              ],
-            );
-          });
+        : LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                children: [
+                  const SizedBox(height: 20),
+                  Text(
+                    "Nenhuma Transação Cadastrada",
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 20),
+                  Image.asset(
+                    "assets/images/waiting.png",
+                    fit: BoxFit.cover,
+                    height: constraints.maxHeight * 0.6,
+                  ),
+                ],
+              );
+            },
+          );
   }
 }
 
@@ -79,7 +81,7 @@ class AlertConfirmation extends StatelessWidget {
     required this.tr,
   });
 
-  final void Function(String p1) onRemove;
+  final void Function(String) onRemove;
   final Transaction tr;
 
   @override
